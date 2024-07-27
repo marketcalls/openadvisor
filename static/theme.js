@@ -16,11 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Load the stored theme from local storage
-    const storedTheme = localStorage.getItem('theme');
-    if (storedTheme) {
-        updateTheme(storedTheme);
-    }
+    // Load the stored theme from local storage or set default to dark theme
+    const storedTheme = localStorage.getItem('theme') || 'dark';
+    updateTheme(storedTheme);
 
     themeController.forEach(button => {
         button.addEventListener('click', (event) => {
