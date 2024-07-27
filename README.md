@@ -41,7 +41,6 @@ OpenAdvisor utilizes a modern and efficient tech stack, carefully chosen to prov
 ### Development and Deployment Tools
 
 - **pip**: The package installer for Python, used to manage project dependencies.
-- **Node.js and npm**: Used for managing frontend dependencies and build processes.
 - **Git**: For version control and collaborative development.
 
 This tech stack is designed to provide a balance between performance, ease of development, and maintainability. It allows for rapid development and iteration, crucial for a hackathon project, while also providing a solid foundation for potential future scaling and enhancement.
