@@ -1,0 +1,22 @@
+# Ignore .env files
+.env
+
+# Ignore virtual environment folders
+venv/
+venv*/
+
+# Ignore database files
+*.db
+*.sqlite3
+
+# Ignore compiled Python files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore VS Code files
+.vscode/
+
+# Other typical ignores
+.DS_Store
+Thumbs.db

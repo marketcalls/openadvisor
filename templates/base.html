@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAdvisor</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com/3.4.4"></script>
+    <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@heroicons/react/outline/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@heroicons/react/solid/index.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #00C6FF, #0072FF, #8733FF, #FF5C7C, #FF00C6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-base-200 text-base-content">
+    <div class="flex flex-col min-h-screen">
+        <nav class="bg-base-300 p-4">
+            <div class="container mx-auto flex justify-between">
+                <a href="/" class="text-lg font-bold gradient-text">OpenAdvisor</a>
+                <div class="flex space-x-4">
+                    {% if current_user.is_authenticated %}
+                        <a href="/dashboard" class="btn btn-sm">Dashboard</a>
+                        <a href="/logout" class="btn btn-sm btn-secondary">Logout</a>
+                    {% else %}
+                        <a href="/login" class="btn btn-sm btn-primary">Login</a>
+                        <a href="/register" class="btn btn-sm btn-secondary">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+        <main class="flex-grow container mx-auto p-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alert-container space-y-2">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+        <footer class="bg-base-300 p-4 text-center">
+            <p>OpenAdvisor, &copy; copyright {{ current_year }}</p>
+        </footer>
+    </div>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>
