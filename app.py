@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from extensions import db, mail, login_manager, limiter, bcrypt
+from extensions import db, mail, login_manager, limiter, bcrypt, start_scheduler
 from flask_migrate import Migrate
 from routes.auth import auth_bp
 from routes.core import core_bp
@@ -41,4 +41,5 @@ def page_not_found(e):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        start_scheduler()  # Start the scheduler
     app.run(debug=True)
