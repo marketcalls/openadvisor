@@ -48,9 +48,8 @@ This tech stack is designed to provide a balance between performance, ease of de
 
 ## Prerequisites
 
-- Python 3.8+
+- Python 3.9+
 - pip
-- Node.js and npm (for frontend development)
 
 ## Installation
 
@@ -71,23 +70,11 @@ This tech stack is designed to provide a balance between performance, ease of de
    pip install -r requirements.txt
    ```
 
-4. Install frontend dependencies:
-   ```
-   cd app/static
-   npm install
-   ```
 
-5. Set up the database:
-   ```
-   flask db init
-   flask db migrate
-   flask db upgrade
-   ```
-
-6. Create a `.env` file in the root directory and add the necessary environment variables:
+4. Create a `.env` file in the root directory and add the necessary environment variables:
    ```
    SECRET_KEY=your_secret_key
-   DATABASE_URL=sqlite:///openadvisor.db
+   SQLALCHEMY_DATABASE_URI=sqlite:///openadvisor.db
    ```
 
 ## Running the Application
