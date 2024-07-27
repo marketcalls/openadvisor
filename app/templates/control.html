@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAdvisor Control Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-purple-900 text-white">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8">OpenAdvisor Control Panel</h1>
+        
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Download Data</h2>
+            <button id="downloadAllBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Download All Data
+            </button>
+            <div id="downloadProgress" class="mt-4 hidden">
+                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                    <div id="downloadProgressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="downloadStatus" class="mt-2"></p>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Train Models</h2>
+            <button id="trainAllBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Train All Models
+            </button>
+            <div id="trainProgress" class="mt-4 hidden">
+                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                    <div id="trainProgressBar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="trainStatus" class="mt-2"></p>
+            </div>
+        </div>
+
+        <div id="resultsContainer" class="mt-8 hidden">
+            <h2 class="text-2xl font-semibold mb-4">Training Results</h2>
+            <canvas id="resultsChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const downloadProgress = document.getElementById('downloadProgress');
+        const downloadProgressBar = document.getElementById('downloadProgressBar');
+        const downloadStatus = document.getElementById('downloadStatus');
+        const trainAllBtn = document.getElementById('trainAllBtn');
+        const trainProgress = document.getElementById('trainProgress');
+        const trainProgressBar = document.getElementById('trainProgressBar');
+        const trainStatus = document.getElementById('trainStatus');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const resultsChart = document.getElementById('resultsChart');
+
+        downloadAllBtn.addEventListener('click', function() {
+            downloadProgress.classList.remove('hidden');
+            downloadStatus.textContent = 'Downloading data...';
+            downloadProgressBar.style.width = '0%';
+
+            const eventSource = new EventSource('/download_all_data', { method: 'POST' });
+
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.progress) {
+                    downloadProgressBar.style.width = `${data.progress}%`;
+                    downloadStatus.textContent = `Downloaded data for ${data.symbol}`;
+                }
+                if (data.message) {
+                    downloadStatus.textContent = data.message;
+                    eventSource.close();
+                }
+            };
+
+            eventSource.onerror = function() {
+                downloadStatus.textContent = 'An error occurred while downloading data.';
+                eventSource.close();
+            };
+        });
+
+        trainAllBtn.addEventListener('click', function() {
+            trainProgress.classList.remove('hidden');
+            trainStatus.textContent = 'Training models...';
+            trainProgressBar.style.width = '0%';
+
+            fetch('/train_all_models', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    const lastItem = data[data.length - 1];
+                    trainProgressBar.style.width = `${lastItem.progress}%`;
+                    trainStatus.textContent = `Training completed for ${data.length} models.`;
+                    displayResults(data);
+                });
+        });
+
+        function displayResults(data) {
+            resultsContainer.classList.remove('hidden');
+            
+            const symbols = data.map(item => item.symbol);
+            const mseValues = data.map(item => item.mse);
+            const r2Values = data.map(item => item.r2);
+
+            new Chart(resultsChart, {
+                type: 'bar',
+                data: {
+                    labels: symbols,
+                    datasets: [
+                        {
+                            label: 'MSE',
+                            data: mseValues,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgb(255, 99, 132)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'R2 Score',
+                            data: r2Values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            borderColor: 'rgb(75, 192, 192)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

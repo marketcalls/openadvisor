@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAdvisor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-purple-900 text-white">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8">OpenAdvisor</h1>
+        
+        <nav class="mb-8">
+            <ul class="flex space-x-4">
+                <li><a href="/" class="text-blue-300 hover:text-blue-100">Dashboard</a></li>
+                <li><a href="/control" class="text-blue-300 hover:text-blue-100">Control Panel</a></li>
+                <li><a href="/predictions" class="text-blue-300 hover:text-blue-100">Predictions</a></li>
+            </ul>
+        </nav>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-purple-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Account Balance</h2>
+                <p class="text-3xl font-bold">₹42,00,000</p>
+            </div>
+            
+            <div class="bg-purple-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Money Made This Week</h2>
+                <p class="text-3xl font-bold text-green-400">₹27,000 ↑</p>
+            </div>
+        </div>
+        
+        <div class="mt-12">
+            <h2 class="text-2xl font-semibold mb-4">Stock Holdings</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" id="stockHoldings">
+                <!-- Stock holdings will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch and display stock holdings
+        fetch('/api/portfolio')
+            .then(response => response.json())
+            .then(data => {
+                const holdingsContainer = document.getElementById('stockHoldings');
+                data.forEach(stock => {
+                    const stockElement = document.createElement('div');
+                    stockElement.className = 'bg-purple-700 p-4 rounded-lg text-center';
+                    stockElement.innerHTML = `
+                        <p class="font-semibold">${stock.symbol}</p>
+                        <p class="text-sm">${stock.name}</p>
+                        <p class="text-sm">Qty: ${stock.quantity}</p>
+                        <p class="text-sm">₹${stock.current_price.toFixed(2)}</p>
+                    `;
+                    holdingsContainer.appendChild(stockElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching portfolio data:', error);
+                const holdingsContainer = document.getElementById('stockHoldings');
+                holdingsContainer.innerHTML = '<p class="text-red-500">Error loading portfolio data. Please try again later.</p>';
+            });
+    </script>
+</body>
+</html>
