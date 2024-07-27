@@ -92,6 +92,33 @@ This tech stack is designed to provide a balance between performance, ease of de
 3. View the dashboard to see current stock recommendations and portfolio performance.
 4. Use the backtesting module to evaluate the strategy's historical performance.
 
+# OpenAdvisor: Future Roadmap
+
+## Immediate Roadmap Items
+
+### 1. Advanced Portfolio Analytics
+- Implement comprehensive risk-adjusted return metrics and sector allocation analysis.
+- Provide detailed performance attribution to identify key drivers of portfolio returns.
+
+### 2. Customizable Alerts System
+- Develop a flexible alert system for price targets, volatility, and news-based notifications.
+- Create a centralized dashboard for managing alerts with multi-channel delivery (mobile, email).
+
+### 3. Intelligent Portfolio Rebalancing
+- Implement automated portfolio rebalancing based on user-defined thresholds and strategies.
+- Provide smart rebalancing suggestions considering tax implications and market conditions.
+
+### 4. Enhanced Backtesting with Market Scenarios
+- Implement portfolio testing against historical market events and user-defined scenarios.
+- Provide comparative analysis of portfolio performance against relevant benchmark indices.
+
+### 5. AI-Powered Investment Insights
+- Develop NLP-based summarization of key financial news relevant to user portfolios.
+- Implement anomaly detection and AI-generated explanations for stock recommendations.
+
+### 6. ML-based Thematic Investing Concepts
+- Develop machine learning algorithms to identify and track emerging market themes and trends.
+- Provide AI-curated thematic portfolios with regular updates based on market dynamics and user preferences.
 
 
 ### Contributing
