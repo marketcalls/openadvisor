@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="text-center flex flex-col justify-center items-center h-full">
+    <img src="/static/images/logo.png" alt="OpenAdvisor Logo" class="mx-auto mb-4 w-24 h-24 md:w-32 md:h-32">
+    <h1 class="text-5xl md:text-8xl font-bold mb-2 gradient-text">OpenAdvisor</h1>
+    <p class="text-lg md:text-2xl mb-8">Innovative Insights for Better Investments</p>
+    <div class="flex justify-center space-x-4 mb-8">
+        <a href="/login" class="btn btn-primary py-2 px-4 text-sm md:text-base">Login</a>
+        <a href="/register" class="btn btn-secondary py-2 px-4 text-sm md:text-base">Register</a>
+    </div>
+</div>
+{% endblock %}
