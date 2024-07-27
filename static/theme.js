@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             themeToggleContainer.style.backgroundColor = '#333';
         } else if (theme === 'night') {
             themeToggleContainer.style.backgroundColor = '#1a1a2e';
-        } else if (theme === 'cmyk') {
+        } else if (theme === 'light') {
             themeToggleContainer.style.backgroundColor = '#0f4c81';
         }
     };
