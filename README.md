@@ -84,7 +84,7 @@ This tech stack is designed to provide a balance between performance, ease of de
    flask db upgrade
    ```
 
-6. Create a `.env` file in the root directory and add necessary environment variables:
+6. Create a `.env` file in the root directory and add the necessary environment variables:
    ```
    SECRET_KEY=your_secret_key
    DATABASE_URL=sqlite:///openadvisor.db
@@ -106,32 +106,7 @@ This tech stack is designed to provide a balance between performance, ease of de
 3. View the dashboard to see current stock recommendations and portfolio performance.
 4. Use the backtesting module to evaluate the strategy's historical performance.
 
-## Development
 
-### Project Structure
-
-```
-openadvisor/
-├── app/
-│   ├── __init__.py
-│   ├── models/
-│   ├── routes/
-│   ├── services/
-│   ├── static/
-│   └── templates/
-├── tests/
-├── config.py
-├── requirements.txt
-└── run.py
-```
-
-### Running Tests
-
-Execute the test suite using pytest:
-
-```
-pytest
-```
 
 ### Contributing
 
@@ -163,7 +138,7 @@ You should have received a copy of the GNU General Public License along with Ope
 ## Team
 
 - Rajandran - Backend Developer, Database Expert
-- Aksshaya - Test Engineer and Content Creator
+- Aksshaya - Web Designer, Test Engineer and Content Creator
 - Deepanshu - Frontend Engineer
 
 ## Disclaimer
