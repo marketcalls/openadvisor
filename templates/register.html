@@ -2,7 +2,11 @@
 
 {% block content %}
 <div class="flex items-center justify-center h-full">
-    <div class="text-center mt-20">
+    <div class="text-center mt-10">
+        <!-- Add logo at the top -->
+        <div class="mb-8">
+            <img src="{{ url_for('static', filename='images/openadvisor_logo.png') }}" alt="Logo" class="mx-auto h-32 w-32">
+        </div>
         <h2 class="text-2xl font-bold mb-4">Register</h2>
         <form method="POST">
             {{ form.hidden_tag() }}

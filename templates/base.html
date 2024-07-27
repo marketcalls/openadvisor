@@ -5,55 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenAdvisor</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com/3.4.4"></script>
     <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@heroicons/react/outline/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@heroicons/react/solid/index.js"></script>
     <style>
         body, html {
             height: 100%;
+            margin: 0;
+            padding: 0;
         }
         .gradient-text {
             background: linear-gradient(90deg, #00C6FF, #0072FF, #8733FF, #FF5C7C, #FF00C6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        .theme-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background: #3d4451; /* Use DaisyUI base-300 color */
+            border-radius: 25px;
+            padding: 5px 10px;
+            max-width: 180px; /* Increase the max-width to accommodate spacing */
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+        .theme-toggle-button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #1f2937; /* Use DaisyUI base-200 color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            margin: 0 5px;
+        }
+        .theme-toggle-button svg {
+            width: 20px;
+            height: 20px;
+            color: #ffffff; /* Use white color for the icons */
+        }
+        .theme-toggle-button.active {
+            background: #0072FF; /* Adjusted active color */
+        }
+        @media (max-width: 640px) {
+            .theme-toggle-container {
+                position: static;
+                margin-top: 10px;
+            }
+            .footer-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            .footer-text {
+                margin-bottom: 10px;
+            }
+        }
     </style>
 </head>
-<body class="bg-base-200 text-base-content">
-    <div class="flex flex-col min-h-screen">
-        <nav class="bg-base-300 p-4">
-            <div class="container mx-auto flex justify-between">
-                <a href="/" class="text-lg font-bold gradient-text">OpenAdvisor</a>
-                <div class="flex space-x-4">
-                    {% if current_user.is_authenticated %}
-                        <a href="/dashboard" class="btn btn-sm">Dashboard</a>
-                        <a href="/logout" class="btn btn-sm btn-secondary">Logout</a>
-                    {% else %}
-                        <a href="/login" class="btn btn-sm btn-primary">Login</a>
-                        <a href="/register" class="btn btn-sm btn-secondary">Register</a>
-                    {% endif %}
-                </div>
-            </div>
-        </nav>
-        <main class="flex-grow container mx-auto p-4">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="alert-container space-y-2">
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
+<body class="bg-base-200 text-base-content flex flex-col min-h-screen">
+    <header class="bg-base-300 p-4">
+        <div class="container mx-auto flex justify-between">
+            <a href="/" class="text-lg font-bold gradient-text">OpenAdvisor</a>
+            <div class="flex space-x-4">
+                {% if current_user.is_authenticated %}
+                    <a href="/dashboard" class="btn btn-sm">Dashboard</a>
+                    <a href="/logout" class="btn btn-sm btn-secondary">Logout</a>
+                {% else %}
+                    <!-- <a href="/login" class="btn btn-sm btn-primary">Login</a>
+                    <a href="/register" class="btn btn-sm btn-secondary">Register</a> -->
                 {% endif %}
-            {% endwith %}
-            {% block content %}{% endblock %}
-        </main>
-        <footer class="bg-base-300 p-4 text-center">
+            </div>
+        </div>
+    </header>
+    <main class="flex-grow container mx-auto p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container space-y-2">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="bg-base-300 p-4 relative flex justify-center items-center footer-content">
+        <div class="footer-text text-center">
             <p>OpenAdvisor, &copy; copyright {{ current_year }}</p>
-        </footer>
-    </div>
+        </div>
+        <div class="theme-toggle-container">
+            <!-- Heroicon for dark theme (Moon) -->
+            <div class="theme-toggle-button" data-theme="dark">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                </svg>
+            </div>
+            <!-- Heroicon for night theme (Computer desktop) -->
+            <div class="theme-toggle-button" data-theme="night">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+                </svg> 
+            </div>
+            <!-- Heroicon for CMYK theme (Sun) -->
+            <div class="theme-toggle-button" data-theme="cmyk">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                </svg>
+            </div>
+        </div>
+    </footer>
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
 </body>
 </html>
