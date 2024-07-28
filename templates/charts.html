@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="flex flex-col items-center justify-center">
+    <div id="controls" class="flex space-x-4 items-center mb-4">
+        <div class="flex items-center space-x-2">
+            <label for="ticker" class="text-white">Symbol</label>
+            <input type="text" id="ticker" class="p-2 rounded border w-36 bg-gray-900 text-white" placeholder="Symbol" value="RELIANCE.NS">
+        </div>
+        <div class="flex items-center space-x-2">
+            <label for="emaPeriod" class="text-white">EMA</label>
+            <input type="number" id="emaPeriod" class="p-2 rounded border w-16 bg-gray-900 text-white" placeholder="EMA" value="20" min="1" max="200">
+        </div>
+        <div class="flex items-center space-x-2">
+            <label for="rsiPeriod" class="text-white">RSI</label>
+            <input type="number" id="rsiPeriod" class="p-2 rounded border w-16 bg-gray-900 text-white" placeholder="RSI" value="14" min="1" max="200">
+        </div>
+        <button id="fetchData" class="p-2 bg-blue-500 text-white rounded">Fetch Data</button>
+    </div>
+    <div id="chartContainer" class="w-full" style="max-width: 1200px; height: 70vh;">
+        <div id="chart" class="w-full h-3/4"></div>
+        <div id="rsiChart" class="w-full h-1/4"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<script src="{{ url_for('static', filename='charts.js') }}"></script>
+{% endblock %}

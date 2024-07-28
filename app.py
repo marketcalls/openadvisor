@@ -5,6 +5,7 @@ from routes.auth import auth_bp
 from routes.core import core_bp
 from routes.dashboard import dashboard_bp
 from routes.predictions import predictions_bp
+from routes.charts import charts_bp  # Import the charts blueprint
 from datetime import datetime
 import os
 from dotenv import load_dotenv
@@ -26,7 +27,8 @@ login_manager.login_view = 'auth.login'
 app.register_blueprint(auth_bp)
 app.register_blueprint(core_bp)
 app.register_blueprint(dashboard_bp)
-app.register_blueprint(predictions_bp)  # Register predictions blueprint
+app.register_blueprint(predictions_bp) 
+app.register_blueprint(charts_bp)  # Register the charts blueprint
 
 @app.route('/')
 def index():

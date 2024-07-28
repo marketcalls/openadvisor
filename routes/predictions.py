@@ -20,6 +20,7 @@ def predictions():
         query += f" LIMIT {limit}"
     
     df = pd.read_sql_query(query, db.engine)
+    df['Rank'] = range(1, len(df) + 1)  # Add Rank column
     predictions = df.to_dict(orient='records')
 
     return render_template('predictions.html', predictions=predictions, filter_option=filter_option)
