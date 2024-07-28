@@ -80,10 +80,41 @@ This tech stack is designed to provide a balance between performance, ease of de
 
 1. Start the Flask development server:
    ```
-   flask run
+   python app.py
+
    ```
 
 2. Access the application at `http://localhost:5000`
+
+## Automated Data Download and Predictions
+
+This project uses AP Scheduler to automate the periodic download of stock portfolio data and to schedule machine learning trainings and predictions. The initial data download and training/prediction tasks need to be triggered manually, and later they will be scheduled automatically.
+
+### Initial Manual Data Download
+
+To load the stock portfolio data at the start for machine learning trainings and predictions, run the following command:
+
+```bash
+python data_downloader.py
+```
+
+### Initial Manual Trainings and Predictions
+
+To start the initial machine learning trainings and predictions, run the following command:
+
+```bash
+python trainings_predictions.py
+```
+
+### Setting Up AP Scheduler for Automated Tasks
+
+1. **Automated Data Download**
+
+   The `data_downloader.py` script is set to be scheduled to download stock portfolio data on a daily basis. AP Scheduler is configured to run this task every 24 hours. To ensure this, the script should be integrated with the main Flask application or run as a standalone script with AP Scheduler enabled.
+
+2. **Automated Trainings and Predictions**
+
+   The `trainings_predictions.py` script is set to be scheduled to run weekly to generate updated predictions. AP Scheduler is configured to run this task every 7 days.
 
 ## Usage
 
