@@ -178,6 +178,7 @@ You should have received a copy of the GNU General Public License along with Ope
 - [OpenAI](https://www.openai.com) for ChatGPT-4, which also provided assistance in the development process
 - [FossHack 2024](https://fossunited.org/fosshack/2024) organizers and sponsors
 - All open-source libraries and tools used in this project
+- Amazon SES for email notifications and alerts (free tier)
 
 ## Team
 
