@@ -1,7 +1,100 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto mt-8">
-    <h1 class="text-3xl font-bold mb-4 text-center">Welcome to OpenAdvisor</h1>
+<!-- Trading Terminal Header -->
+<div class="bg-base-300 text-base-content p-2 text-sm font-mono">
+    <div class="container mx-auto flex justify-between items-center">
+        {% for index, data in market_indices.items() %}
+            <div class="flex items-center space-x-2">
+                <span class="font-bold">{{ index }}:</span>
+                <span>{{ "{:,.2f}".format(data.value) }}</span>
+                <span class="{{ 'text-success' if data.change > 0 else 'text-error' }}">
+                    {% if data.change > 0 %}
+                        ↑ {{ "{:.2f}".format(data.change) }}%
+                    {% else %}
+                        ↓ {{ "{:.2f}".format(data.change * -1) }}%
+                    {% endif %}
+                </span>
+            </div>
+        {% endfor %}
+    </div>
 </div>
+
+<div class="container mx-auto mt-8 p-4">
+    <h1 class="text-5xl font-bold mb-12 text-center gradient-text">Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <!-- Account Balance Card -->
+        <div class="card bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">Account Balance</h2>
+                <p class="text-5xl font-bold">₹{{ "{:,}".format(account_balance) }}</p>
+                <p class="text-sm opacity-75 mt-2">Updated 5 minutes ago</p>
+            </div>
+        </div>
+        
+        <!-- Money Made This Week Card -->
+        <div class="card bg-gradient-to-br from-green-400 to-blue-500 text-white shadow-xl hover:shadow-2xl transition-shadow duration-300">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">Money Made This Week</h2>
+                <p class="text-5xl font-bold">₹{{ "{:,}".format(weekly_profit) }} <span class="text-2xl">↑</span></p>
+                <p class="text-sm opacity-75 mt-2">{{ "{:.1f}".format(weekly_profit / account_balance * 100) }}% increase from last week</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stock Holdings Table -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="text-3xl font-bold mb-6 gradient-text">Stock Holdings</h2>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                        <tr class="bg-base-200">
+                            <th class="bg-base-200">Stock</th>
+                            <th class="bg-base-200">Quantity</th>
+                            <th class="bg-base-200">Avg. Price</th>
+                            <th class="bg-base-200">Current Price</th>
+                            <th class="bg-base-200">P&L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set total_investment = 1000000 %}
+                        {% for stock, data in stock_data.items() %}
+                            {% if data['current_price'] > 0 %}
+                                {% set quantity = (total_investment / 10 / data['current_price']) | round(0, 'floor') | int %}
+                                {% set avg_price = (total_investment / 10 / quantity) | round(2) %}
+                                {% set current_price = data['current_price'] | round(2) %}
+                                {% set pl = ((current_price - avg_price) * quantity) | round(2) %}
+                                <tr class="hover:bg-base-200 transition-colors duration-200">
+                                    <td class="font-medium">{{ stock }}</td>
+                                    <td>{{ quantity }}</td>
+                                    <td>₹{{ "{:,.2f}".format(avg_price) }}</td>
+                                    <td>₹{{ "{:,.2f}".format(current_price) }}</td>
+                                    <td class="{{ 'text-success' if pl > 0 else 'text-error' }} font-bold">
+                                        ₹{{ "{:,.2f}".format(pl) }} ({{ "{:.2f}".format(pl / (avg_price * quantity) * 100) }}%)
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr class="hover:bg-base-200 transition-colors duration-200">
+                                    <td class="font-medium">{{ stock }}</td>
+                                    <td colspan="4" class="text-error">Error fetching data</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .gradient-text {
+        background: linear-gradient(90deg, #00C6FF, #0072FF, #8733FF, #FF5C7C, #FF00C6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+</style>
 {% endblock %}
