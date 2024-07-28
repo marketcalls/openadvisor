@@ -109,7 +109,7 @@ def fetch_and_insert_update_data(df):
 
     for yahoo_symbol in df['YAHOO_SYMBOL']:
         try:
-            data = yf.download(yahoo_symbol, start='1994-01-01', end='2024-01-01')
+            data = yf.download(yahoo_symbol, period='max')
             for date, row in data.iterrows():
                 finance_data = session.query(FinanceData).filter_by(symbol=yahoo_symbol, date=date).first()
                 if finance_data:

@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import pandas_ta as ta
-from sqlalchemy import create_engine, text, Column, Integer, String, DateTime, MetaData, Table, update
+from sqlalchemy import create_engine, text, Column, Integer, Float,String, DateTime, MetaData, Table, update
 from sqlalchemy.orm import sessionmaker
 from catboost import CatBoostRegressor
 from sklearn.model_selection import train_test_split
@@ -44,7 +44,14 @@ timestamps_table = Table('timestamps', metadata,
     Column('operation', String, nullable=False)  # download, training, or prediction
 )
 
-# Create the table if it doesn't exist
+# Define the LTP table
+ltp_table = Table('ltp', metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('symbol', String, nullable=False, unique=True),
+    Column('ltp', Float, nullable=False)
+)
+
+# Create the tables if they don't exist
 metadata.create_all(engine)
 
 # Function to create features using pandas_ta
@@ -283,18 +290,38 @@ def make_all_predictions():
         else:
             returns_30day = None
         
+        # Get the LTP
+        ltp = last_known_close if last_known_close is not None else 0
+        
         # Append to results
         aggregate_results.append({
             'Stock': symbol,
             '30 day Closing': round(closing_price_30day, 2),
-            '30 day returns': round(returns_30day, 2) if returns_30day is not None else None
+            '30 day returns': round(returns_30day, 2) if returns_30day is not None else None,
+            'LTP': round(ltp, 2)
         })
+
+        # Insert or update LTP table
+        stmt = (
+            update(ltp_table)
+            .where(ltp_table.c.symbol == symbol)
+            .values(ltp=ltp)
+        )
+        result = session.execute(stmt)
+        if result.rowcount == 0:  # If no row was updated, insert a new one
+            session.execute(
+                ltp_table.insert().values(symbol=symbol, ltp=ltp)
+            )
+        session.commit()
 
     # Create DataFrame from aggregate results
     aggregate_df = pd.DataFrame(aggregate_results)
 
     # Sort by 30-day returns in descending order
     aggregate_df = aggregate_df.sort_values('30 day returns', ascending=False)
+
+    # Add ranking column
+    aggregate_df['Rank'] = range(1, len(aggregate_df) + 1)
 
     aggregate_predictions_path = os.path.join(predictions_folder, 'aggregate_30day_predictions.csv')
     aggregate_df.to_csv(aggregate_predictions_path, index=False)

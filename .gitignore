@@ -15,8 +15,12 @@ venv*/
 
 # Ignore CatBoost training files
 catboost_training.json
-*.tsv
-*.tfevents
+lear_error.tsv 
+test_error.tsv
+time_left.tsv
+events.out.tfevents
+events.out.tfevents.*
+*.tmp
 
 # Ignore compiled Python files
 __pycache__/

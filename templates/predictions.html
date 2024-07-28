@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <h1 class="text-3xl font-bold">Predictions</h1>
+    <div class="form-control">
+        <form id="filter-form" method="get" action="/predictions">
+            <select name="filter" class="select select-bordered" onchange="document.getElementById('filter-form').submit()">
+                <option {% if filter_option == 'TOP 10' %}selected{% endif %}>TOP 10</option>
+                <option {% if filter_option == 'TOP 20' %}selected{% endif %}>TOP 20</option>
+                <option {% if filter_option == 'TOP 50' %}selected{% endif %}>TOP 50</option>
+                <option {% if filter_option == 'TOP 100' %}selected{% endif %}>TOP 100</option>
+                <option {% if filter_option == 'ALL' %}selected{% endif %}>ALL</option>
+            </select>
+        </form>
+    </div>
+</div>
+
+<table class="table table-zebra w-full">
+    <thead>
+        <tr>
+            <th>Rank</th> <!-- Add Rank header -->
+            <th>Stock</th>
+            <th>30 day Closing</th>
+            <th>30 day returns</th>
+            <th>LTP</th> <!-- Add LTP header -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for prediction in predictions %}
+        <tr>
+            <td>{{ prediction.Rank }}</td> <!-- Add Rank data -->
+            <td>{{ prediction.Stock }}</td>
+            <td>{{ prediction['30 day Closing'] }}</td>
+            <td>{{ prediction['30 day returns'] }}</td>
+            <td>{{ prediction.LTP }}</td> <!-- Add LTP data -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
