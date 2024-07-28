@@ -183,8 +183,9 @@ You should have received a copy of the GNU General Public License along with Ope
 ## Team
 
 - Rajandran - Backend Developer, Database Expert, Creator of OpenAlgo & OpenAdvisor, Lead Maintainer
-- Aksshaya - Web Designer, Test Engineer and Content Creator, Gopal National School, 7th Grade, Bangalore
-- Deepanshu - Frontend Engineer , 3rd Year, E.C.E, Thapar Institute of Engineering & Technology, Patiala, Punjab
+- Deepanshu - Frontend Engineer , 3rd Year, E.C.E, Thapar Institute of Engineering & Technology, Patiala, Punjab, Contributor
+- Aksshaya - Web Designer, Test Engineer and Content Creator, Gopal National School, 7th Grade, Bangalore, Contributor
+
 
 ## Disclaimer
 
