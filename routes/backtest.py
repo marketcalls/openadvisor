@@ -284,7 +284,7 @@ def calculate_max_drawdown(equity_curve):
     return max_drawdown * 100
 
 def calculate_win_rate(trades):
-    winning_trades = sum(1 for trade in tra des if trade['profit_loss'] > 0)
+    winning_trades = sum(1 for trade in trades if trade['profit_loss'] > 0)
     return (winning_trades / len(trades)) * 100 if trades else 0
 
 def calculate_profit_factor(trades):
