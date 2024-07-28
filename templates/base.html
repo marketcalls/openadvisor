@@ -73,8 +73,9 @@
             <div class="flex space-x-4">
                 {% if current_user.is_authenticated %}
                     <a href="/dashboard" class="btn btn-sm">Dashboard</a>
-                    <a href="/predictions" class="btn btn-sm">Predictions</a> <!-- Add Predictions link -->
-                    <a href="/charts" class="btn btn-sm">Charts</a> <!-- Add Charts link -->
+                    <a href="/predictions" class="btn btn-sm">Predictions</a>
+                    <a href="/charts" class="btn btn-sm">Charts</a>
+                    <a href="/backtest" class="btn btn-sm">Backtesting</a> <!-- Add Backtesting link -->
                     <a href="/logout" class="btn btn-sm btn-secondary">Logout</a>
                 {% else %}
                     <!-- <a href="/login" class="btn btn-sm btn-primary">Login</a>

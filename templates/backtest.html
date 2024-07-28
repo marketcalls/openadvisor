@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div x-data="backtestFormHandler()" class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4">Backtesting</h1>
+    
+    <form @submit.prevent="submitForm" class="mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="form-control">
+                <label class="label" for="startDate">
+                    <span class="label-text">Start Date</span>
+                </label>
+                <input type="date" x-model="startDate" id="startDate" name="start_date" class="input input-bordered" required>
+            </div>
+            <div class="form-control">
+                <label class="label" for="endDate">
+                    <span class="label-text">End Date</span>
+                </label>
+                <input type="date" x-model="endDate" id="endDate" name="end_date" class="input input-bordered" required>
+            </div>
+            <div class="form-control">
+                <label class="label" for="initialCapital">
+                    <span class="label-text">Initial Capital (₹)</span>
+                </label>
+                <input type="number" x-model="initialCapital" id="initialCapital" name="initial_capital" class="input input-bordered" value="1000000" required>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4">Run Backtest</button>
+    </form>
+
+    <div x-show="loading" id="loadingSpinner" class="flex justify-center items-center">
+        <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+    </div>
+
+    <div x-show="resultsVisible" id="results">
+        <div id="equityChart" class="mb-8"></div>
+
+        <div class="stats shadow mb-8">
+            <div class="stat">
+                <div class="stat-title">Total Return</div>
+                <div class="stat-value" x-text="totalReturn"></div>
+                <div class="stat-desc" x-text="totalReturnPercentage"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Max Drawdown</div>
+                <div class="stat-value" x-text="maxDrawdown"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Win Rate</div>
+                <div class="stat-value" x-text="winRate"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Profit Factor</div>
+                <div class="stat-value" x-text="profitFactor"></div>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-bold mb-4">Trade History</h2>
+        <div class="overflow-x-auto">
+            <table class="table w-full">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Entry Date</th>
+                        <th>Entry Price</th>
+                        <th>Exit Date</th>
+                        <th>Exit Price</th>
+                        <th>Quantity</th>
+                        <th>Holding Period (Days)</th>
+                        <th>Profit/Loss</th>
+                    </tr>
+                </thead>
+                <tbody id="tradesTableBody">
+                    <template x-for="trade in trades" :key="trade.symbol">
+                        <tr>
+                            <td x-text="trade.symbol"></td>
+                            <td x-text="trade.entry_date"></td>
+                            <td x-text="'₹' + trade.entry_price.toFixed(2)"></td>
+                            <td x-text="trade.exit_date"></td>
+                            <td x-text="'₹' + trade.exit_price.toFixed(2)"></td>
+                            <td x-text="trade.quantity"></td>
+                            <td x-text="trade.holdingPeriod"></td>
+                            <td :class="{'text-green-500': trade.profit_loss >= 0, 'text-red-500': trade.profit_loss < 0}" x-text="'₹' + trade.profit_loss.toFixed(2)"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Include Plotly.js library -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+function backtestFormHandler() {
+    return {
+        startDate: '',
+        endDate: '',
+        initialCapital: 1000000,
+        loading: false,
+        resultsVisible: false,
+        totalReturn: '',
+        totalReturnPercentage: '',
+        maxDrawdown: '',
+        winRate: '',
+        profitFactor: '',
+        trades: [],
+
+        init() {
+            this.setDefaultDates();
+        },
+
+        setDefaultDates() {
+            const today = new Date();
+            const startDate = new Date(2024, 0, 1); // January 1, 2024
+
+            this.startDate = startDate.toISOString().split('T')[0];
+            this.endDate = today.toISOString().split('T')[0];
+
+            console.log("Start Date:", this.startDate);
+            console.log("End Date:", this.endDate);
+        },
+
+        async submitForm() {
+            this.loading = true;
+            this.resultsVisible = false;
+
+            const data = {
+                start_date: this.startDate,
+                end_date: this.endDate,
+                initial_capital: this.initialCapital
+            };
+
+            console.log('Sending POST request with data:', data);
+
+            try {
+                const response = await fetch('/backtest', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                this.handleResponse(result);
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        handleResponse(data) {
+            console.log('Received response:', data);
+            this.totalReturn = '₹' + data.metrics.total_return.toLocaleString(undefined, {maximumFractionDigits: 2});
+            this.totalReturnPercentage = data.metrics.total_return_percentage.toFixed(2) + '%';
+            this.maxDrawdown = data.metrics.max_drawdown.toFixed(2) + '%';
+            this.winRate = data.metrics.win_rate.toFixed(2) + '%';
+            this.profitFactor = data.metrics.profit_factor.toFixed(2);
+
+            this.trades = data.trades.map(trade => ({
+                ...trade,
+                holdingPeriod: Math.round((new Date(trade.exit_date) - new Date(trade.entry_date)) / (1000 * 60 * 60 * 24))
+            }));
+
+            this.resultsVisible = true;
+
+            // Plot the equity curve
+            Plotly.newPlot('equityChart', [{
+                x: data.equity_curve.map(point => point.date),
+                y: data.equity_curve.map(point => point.equity),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Equity Curve'
+            }], {
+                title: 'Cumulative Equity',
+                xaxis: { title: 'Date' },
+                yaxis: { title: 'Equity (₹)' }
+            });
+        }
+    }
+}
+</script>
+{% endblock %}
