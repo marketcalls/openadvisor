@@ -9,6 +9,9 @@ venv*/
 *.db
 *.sqlite3
 
+# Ignore .cbm files
+*.cbm
+
 # Ignore compiled Python files
 __pycache__/
 *.py[cod]
