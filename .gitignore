@@ -7,10 +7,16 @@ venv*/
 
 # Ignore database files
 *.db
+*.db-journal
 *.sqlite3
 
 # Ignore .cbm files
 *.cbm
+
+# Ignore CatBoost training files
+catboost_training.json
+*.tsv
+*.tfevents
 
 # Ignore compiled Python files
 __pycache__/

@@ -1,10 +1,11 @@
 import os
 import pandas as pd
 import plotly.graph_objects as go
-from sqlalchemy import create_engine, Column, Integer, String, Float, Date, UniqueConstraint
+from sqlalchemy import create_engine, Column, Integer, String, Float, Date, UniqueConstraint, DateTime, MetaData, Table, update
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.exc import IntegrityError
 import yfinance as yf
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -30,6 +31,7 @@ engine = create_engine(f'sqlite:///{db_file_path}', echo=False)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
+metadata = MetaData()
 
 # Define the Symbols table
 class Symbol(Base):
@@ -52,7 +54,30 @@ class FinanceData(Base):
     volume = Column(Float)
     __table_args__ = (UniqueConstraint('symbol', 'date', name='_symbol_date_uc'),)
 
+# Define the Timestamps table
+timestamps_table = Table('timestamps', metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('symbol', String, nullable=False),
+    Column('timestamp', DateTime, nullable=False),
+    Column('operation', String, nullable=False)  # download, training, or prediction
+)
+
 Base.metadata.create_all(engine)
+metadata.create_all(engine)
+
+def upsert_timestamp(symbol, operation):
+    timestamp = datetime.now(timezone.utc)
+    stmt = (
+        update(timestamps_table)
+        .where(timestamps_table.c.symbol == symbol, timestamps_table.c.operation == operation)
+        .values(timestamp=timestamp)
+    )
+    result = session.execute(stmt)
+    if result.rowcount == 0:  # If no row was updated, insert a new one
+        session.execute(
+            timestamps_table.insert().values(symbol=symbol, timestamp=timestamp, operation=operation)
+        )
+    session.commit()
 
 def read_csv(file_path):
     return pd.read_csv(file_path)
@@ -107,6 +132,10 @@ def fetch_and_insert_update_data(df):
                     session.add(new_finance_data)
                     inserted_data += 1
             print(f'Successfully downloaded data for {yahoo_symbol}')
+            
+            # Store the download timestamp
+            upsert_timestamp(yahoo_symbol, 'download')
+            
         except Exception as e:
             print(f'Failed to download data for {yahoo_symbol}: {e}')
             failed_downloads.append(yahoo_symbol)

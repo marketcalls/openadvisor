@@ -2,11 +2,13 @@ import os
 import pandas as pd
 import numpy as np
 import pandas_ta as ta
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, Column, Integer, String, DateTime, MetaData, Table, update
+from sqlalchemy.orm import sessionmaker
 from catboost import CatBoostRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from tqdm import tqdm
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,6 +32,20 @@ os.makedirs(predictions_folder, exist_ok=True)
 
 # SQLAlchemy setup
 engine = create_engine(f'sqlite:///{db_file_path}', echo=False)
+Session = sessionmaker(bind=engine)
+session = Session()
+metadata = MetaData()
+
+# Define the timestamps table
+timestamps_table = Table('timestamps', metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('symbol', String, nullable=False),
+    Column('timestamp', DateTime, nullable=False),
+    Column('operation', String, nullable=False)  # download, training, or prediction
+)
+
+# Create the table if it doesn't exist
+metadata.create_all(engine)
 
 # Function to create features using pandas_ta
 def create_features(df):
@@ -79,7 +95,21 @@ def calculate_atr(high, low, close, period=14):
     atr = tr.ewm(alpha=1/period, adjust=False).mean()
     return atr
 
-def train_and_predict(symbol, days=30):
+def upsert_timestamp(symbol, operation):
+    timestamp = datetime.now(timezone.utc)
+    stmt = (
+        update(timestamps_table)
+        .where(timestamps_table.c.symbol == symbol, timestamps_table.c.operation == operation)
+        .values(timestamp=timestamp)
+    )
+    result = session.execute(stmt)
+    if result.rowcount == 0:  # If no row was updated, insert a new one
+        session.execute(
+            timestamps_table.insert().values(symbol=symbol, timestamp=timestamp, operation=operation)
+        )
+    session.commit()
+
+def train_model(symbol):
     # Load data from SQLite
     query = f"SELECT * FROM finance_data WHERE symbol = '{symbol}' ORDER BY date"
     df = pd.read_sql(query, engine)
@@ -104,6 +134,25 @@ def train_and_predict(symbol, days=30):
     # Save the model
     model_path = os.path.join(training_folder, f'{symbol}.cbm')
     model.save_model(model_path)
+    
+    # Store the training timestamp
+    upsert_timestamp(symbol, 'training')
+    
+    return model, X_test, y_test
+
+def make_predictions(symbol, model, days=30):
+    # Load data from SQLite
+    query = f"SELECT * FROM finance_data WHERE symbol = '{symbol}' ORDER BY date"
+    df = pd.read_sql(query, engine)
+    df['date'] = pd.to_datetime(df['date'])
+    df.set_index('date', inplace=True)
+    
+    # Create features
+    df = create_features(df)
+    
+    # Prepare features
+    features = ['open', 'high', 'low', 'volume', 'returns', 'prev_day_returns', 'ema5', 'ema10', 'hl2', 'hlc3', 'rsi', 'atr']
+    X = df[features]
     
     # Make predictions for the next 30 days
     last_known_date = df.index[-1]
@@ -141,35 +190,50 @@ def train_and_predict(symbol, days=30):
         last_data = prediction_data.iloc[-1]
     
     # Calculate metrics on test set
-    y_pred = model.predict(X_test)
-    mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
+    y_pred = model.predict(X[features])
+    mse = mean_squared_error(df['close'], y_pred)
+    r2 = r2_score(df['close'], y_pred)
     
     # Create a DataFrame with dates and predictions
     prediction_dates = pd.date_range(start=last_known_date + pd.Timedelta(days=1), periods=days)
     predictions_df = pd.DataFrame({'date': prediction_dates, 'predicted_close': predictions})
     predictions_df.set_index('date', inplace=True)
     
-    return predictions_df, mse, r2, model
+    # Store the prediction timestamp
+    upsert_timestamp(symbol, 'prediction')
+    
+    return predictions_df, mse, r2
 
-def main():
+def train_all_models():
     # Get all unique symbols from the database
     query = "SELECT DISTINCT symbol FROM finance_data"
     symbols = pd.read_sql(query, engine)['symbol'].tolist()
 
-    # Train models and make predictions for all symbols
-    results = {}
+    # Train models for all symbols
     for symbol in tqdm(symbols, desc="Training models"):
         try:
-            predictions_df, mse, r2, model = train_and_predict(symbol)
+            train_model(symbol)
+        except Exception as e:
+            print(f"Error training model for {symbol}: {str(e)}")
+
+def make_all_predictions():
+    # Get all unique symbols from the database
+    query = "SELECT DISTINCT symbol FROM finance_data"
+    symbols = pd.read_sql(query, engine)['symbol'].tolist()
+
+    # Make predictions for all symbols
+    results = {}
+    for symbol in tqdm(symbols, desc="Making predictions"):
+        try:
+            model, X_test, y_test = train_model(symbol)
+            predictions_df, mse, r2 = make_predictions(symbol, model)
             results[symbol] = {
                 'predictions': predictions_df,
                 'mse': mse,
-                'r2': r2,
-                'model': model
+                'r2': r2
             }
         except Exception as e:
-            print(f"Error processing {symbol}: {str(e)}")
+            print(f"Error making predictions for {symbol}: {str(e)}")
 
     # Print results
     for symbol, data in results.items():
@@ -246,4 +310,5 @@ def main():
     print(query_result)
 
 if __name__ == '__main__':
-    main()
+    train_all_models()
+    make_all_predictions()
